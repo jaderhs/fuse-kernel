@@ -367,19 +367,10 @@ static struct fuse_dmmap_region *fuse_dmmap_get(struct fuse_conn *fc,
 		spin_unlock(&fc->lock);
 	}
 
-	if (size != fdr->size) {
+	if (size > fdr->size) {
 
-		int flflags = 0;
-		loff_t floff = 0;
-		loff_t flsize = size;
-
-		if (size < fdr->size) {
-			floff = size;
-			flsize = fdr->size - size;
-			flflags = FALLOC_FL_PUNCH_HOLE|FALLOC_FL_KEEP_SIZE;
-		}
-
-		fdr->filp->f_op->fallocate(fdr->filp, flflags, flsize, floff);
+		fdr->filp->f_op->fallocate(fdr->filp, 0, 0, size);
+		fdr->size = size;
 	}
 
 	return fdr;
