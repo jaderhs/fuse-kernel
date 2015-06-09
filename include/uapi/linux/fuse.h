@@ -692,6 +692,7 @@ struct fuse_munmap_in {
 	__u64	fh;
 	__u64	mapid;
 	__u64	size;		/* Size of memory region */
+	__u64	offset;
 	__u64	reserved;
 };
 

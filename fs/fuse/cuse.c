@@ -193,6 +193,8 @@ struct fuse_dmmap_region {
  * can be shared by multiple client vmas created by forking.
  */
 struct fuse_dmmap_vm {
+	u64 len;
+	u64 off;
 	atomic_t open_count;
 	struct fuse_dmmap_region *region;
 };
@@ -248,7 +250,8 @@ static void fuse_dmmap_vm_close(struct vm_area_struct *vma)
 
 	inarg->fh = ff->fh;
 	inarg->mapid = fdvm->region->mapid;
-	inarg->size = fdvm->region->size;
+	inarg->size = fdvm->len;
+	inarg->offset = fdvm->off;
 
 	req->in.h.opcode = FUSE_MUNMAP;
 	req->in.h.nodeid = ff->nodeid;
@@ -442,6 +445,8 @@ static int cuse_mmap(struct file *file, struct vm_area_struct *vma)
 
 	atomic_set(&fdvm->open_count, 1);
 	fdvm->region = fdr;
+	fdvm->len = inarg.len;
+	fdvm->off = inarg.offset;
 
 	fdr->filp->f_op->mmap(fdr->filp, vma);
 
